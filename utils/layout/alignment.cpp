@@ -12,8 +12,7 @@ void alignment::revComp(void){
    else{
        strand = 45;
    }
-
-   if(flipped = true){
+   if(flipped == true){
        flipped = false;
    }
    else{

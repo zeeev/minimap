@@ -69,6 +69,7 @@ std::ostream & operator<< (std::ostream & os, const alignment & al)
        << "\t" << al.tName
        << "\t" << al.tStart
        << "\t" << al.tEnd
+       << "\t" << al.strand
        << "\t" <<  al.line;
 
     return os;

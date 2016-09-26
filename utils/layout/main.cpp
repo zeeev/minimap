@@ -7,7 +7,22 @@
 #include "alignment.hpp"
 #include "split.hpp"
 
-typedef std::map<std::string, std::map<std::string, long int > > qtCount;
+struct matchInfo{
+    long int posStrand;
+    long int negStrand;
+};
+
+void addMatch(matchInfo * mi, char strand, long int match)
+{
+    if( strand == '-' ){
+        mi->negStrand += match ;
+    }
+    else{
+        mi->posStrand += match ;
+    }
+}
+
+typedef std::map<std::string, std::map< std::string, matchInfo * > > qtCount;
 
 bool sortT(const alignment * al1, const alignment * al2 ){
     if(al1->tName == al2->tName){
@@ -25,7 +40,6 @@ bool sortQ(const alignment * al1, const alignment * al2 ){
 
 int main(int argc, char ** argv)
 {
-
     std::vector<std::string> tOrder ;
     tOrder.push_back("chr1");
     tOrder.push_back("chr2");
@@ -60,7 +74,6 @@ int main(int argc, char ** argv)
     std::map<std::string, std::string> bestTarget;
     std::map<std::string, long int>         tLens;
 
-
     std::string line;
 
     while(getline(std::cin, line)){
@@ -82,16 +95,33 @@ int main(int argc, char ** argv)
 
         tLens[ld[5]] = atol(ld[6].c_str());
 
+        if(qtMatch.find(al->qName)
+           == qtMatch.end()){
 
-        if(qtMatch.find(al->qName) == qtMatch.end()){
-            qtMatch[al->qName][al->tName] = al->match;
+            matchInfo * mi = new matchInfo;
+            mi->negStrand = 0;
+            mi->posStrand = 0;
+
+            addMatch(mi, al->strand, al->match);
+            qtMatch[al->qName][al->tName] = mi;
         }
+
         else if(qtMatch[al->qName].find(al->tName)
-                == qtMatch[al->tName].end() ){
-            qtMatch[al->qName][al->tName] = al->match;
+                == qtMatch[al->qName].end() ){
+
+            matchInfo * mi = new matchInfo;
+            mi->negStrand = 0;
+            mi->posStrand = 0;
+
+            addMatch(mi, al->strand, al->match);
+            qtMatch[al->qName][al->tName] = mi;
+
         }
         else{
-            qtMatch[al->qName][al->tName] += al->match;
+            matchInfo * mi = qtMatch[al->qName][al->tName];
+
+
+            addMatch(mi, al->strand, al->match);
         }
 
         if(al->strand == '-'){
@@ -103,7 +133,8 @@ int main(int argc, char ** argv)
 
     }
 
-    std::cerr << "INFO: loaded "  << records_tSorted.size() << " alignments " << std::endl;
+    std::cerr << "INFO: loaded "  << records_tSorted.size()
+              << " alignments " << std::endl;
     std::cerr << "INFO: Sorting alignment blocks." << std::endl;
 
     std::sort(records_tSorted.begin(), records_tSorted.end(), sortT);
@@ -115,12 +146,14 @@ int main(int argc, char ** argv)
         std::string best    ;
         long int highest = 0;
 
-        for(std::map<std::string, long int >::iterator iz = it->second.begin();
+        for(std::map<std::string, matchInfo * >::iterator iz
+                = it->second.begin();
             iz != it->second.end(); iz++){
 
-            if(iz->second > highest){
+            if(iz->second->negStrand +
+               iz->second->posStrand  > highest){
                 best   = iz->first;
-                highest = iz->second;
+                highest = iz->second->negStrand + iz->second->posStrand;
             }
         }
         bestTarget[it->first] = best;
@@ -144,7 +177,6 @@ int main(int argc, char ** argv)
             }
 
             if(bestTarget[(*i)->qName] == (*i)->tName){
-
                 if(highQmatch.find((*i)->qName) == highQmatch.end()){
                     qOffset[(*i)->qName] = qSum;
                     highQmatch[(*i)->qName] = (*i)->match;
@@ -155,7 +187,6 @@ int main(int argc, char ** argv)
                         highQmatch[(*i)->qName] = (*i)->match;
                     }
                 }
-
             }
             qSum += abs((*i)->qEnd - (*i)->qStart);
         }
@@ -182,6 +213,20 @@ int main(int argc, char ** argv)
 
     for(std::vector< alignment * >::iterator i = records_tSorted.begin();
         i != records_tSorted.end(); i++){
+
+
+        if(qtMatch[(*i)->qName][(*i)->tName]->negStrand
+           > qtMatch[(*i)->qName][(*i)->tName]->posStrand){
+            if(!(*i)->flipped){
+                (*i)->revComp();
+            }
+        }
+        else{
+            if((*i)->flipped){
+                (*i)->revComp();
+            }
+        }
+
         (*i)->qStart = (*i)->qStart + qOffset[(*i)->qName];
         (*i)->qEnd   = (*i)->qEnd   + qOffset[(*i)->qName];
         (*i)->tStart = (*i)->tStart + tOffset[(*i)->tName];

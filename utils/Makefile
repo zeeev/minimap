@@ -3,7 +3,7 @@
 #     zev.kronenberg@gmail.com       #
 ######################################
 
-CXX=g++
+CXX=g++ -g -Wall
 GIT_VERSION := $(shell git describe --abbrev=4 --dirty --always)
 
 
@@ -17,4 +17,4 @@ bin/layout:
 	cd layout && $(CXX) *cpp -o ../bin/layout
 
 clean:
-	 -cd chain && rm *.o ; cd ../layout && rm *.o
+	 -cd chain && rm *.o && cd ../layout && rm *.o && cd ../bin && rm -rf *
