@@ -96,3 +96,19 @@ of a query may not be adjacent.
 [hough]: https://en.wikipedia.org/wiki/Hough_transform
 [invhash]: https://gist.github.com/lh3/974ced188be2f90422cc
 [miniasm]: https://github.com/lh3/miniasm
+
+
+## Plotting
+
+ There are utilities for chaining and plotting in the utils folder.  
+
+### Installing 
+
+``` cd utils && make ```
+
+### Running example (gorilla vs. GRCh38)
+
+``` cd utils 
+cd examples 
+cat susie_ggo_grch38.minimap.txt  | ../bin/layout -u > susie_ggo_human_layout.txt 
+ Rscript --vanilla ../plot/plotLayout.R -f susie_ggo_human_layout.txt -p gor-vs-human.pdf ```
