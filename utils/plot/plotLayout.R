@@ -38,6 +38,18 @@ option_list = list(
             default="query genome (Mb)",
             help="the ylab title",
             metavar="character"
+            ),
+            make_option(c("-w", "--width"),
+            type="numeric",
+            default=10,
+            help="The width of the plot",
+            metavar="numeric"
+            ),
+            make_option(c("-i", "--height"),
+            type="numeric",
+            default=10,
+            help="The height of the plot",
+            metavar="numeric"
             )
 );
 
@@ -63,5 +75,5 @@ thePlot<-thePlot+theme_classic()
 thePlot<-thePlot+theme(legend.position="none")
 thePlot<-thePlot+geom_vline(xintercept=vdat$x/1e6, linetype="longdash", alpha=0.2)
 
-ggsave(filename=opt$pdf, width=10, height=10)
+ggsave(filename=opt$pdf, width=opt$height, height=opt$height)
 

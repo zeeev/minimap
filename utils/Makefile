@@ -3,7 +3,7 @@
 #     zev.kronenberg@gmail.com       #
 ######################################
 
-CXX=g++ -g -Wall
+CXX=g++ -Wreorder
 GIT_VERSION := $(shell git describe --abbrev=4 --dirty --always)
 
 

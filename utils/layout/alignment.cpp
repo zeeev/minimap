@@ -1,5 +1,7 @@
 #include "alignment.hpp"
 
+alignment::~alignment(void){}
+
 void alignment::revComp(void){
 
    LI tmp = qStart       ;
