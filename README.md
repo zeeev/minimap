@@ -117,5 +117,5 @@ Rscript --vanilla ../plot/plotLayout.R -f susie_ggo_human_layout.txt -p gor-vs-h
 
 The resulting figure will look like:
 
-![alt tag](https://github.com/zeeev/wham/blob/master/utils/example/gor-vs-human.png)
+![alt tag](https://github.com/zeeev/minimap/blob/master/utils/example/gor-vs-human.png)
 
