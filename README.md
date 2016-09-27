@@ -114,3 +114,8 @@ cd examples
 cat susie_ggo_grch38.minimap.txt  | ../bin/layout -u > susie_ggo_human_layout.txt
 Rscript --vanilla ../plot/plotLayout.R -f susie_ggo_human_layout.txt -p gor-vs-human.pdf 
  ```
+
+The resulting figure will look like:
+
+![alt tag](https://github.com/zeeev/wham/blob/master/utils/example/gor-vs-human.png)
+
