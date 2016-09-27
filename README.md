@@ -100,7 +100,7 @@ of a query may not be adjacent.
 
 ## Plotting
 
- There are utilities for chaining and plotting in the util folder.  
+ There are utilities for chaining and plotting in the utils folder.  
 
 ### Installing 
 
