@@ -100,15 +100,18 @@ of a query may not be adjacent.
 
 ## Plotting
 
- There are utilities for chaining and plotting in the utils folder.  
+ There are utilities for chaining and plotting in the utils folder.
 
-### Installing 
+### Installing
 
 ``` cd utils && make ```
 
 ### Running example (gorilla vs. GRCh38)
 
-``` cd utils 
-cd examples 
-cat susie_ggo_grch38.minimap.txt  | ../bin/layout -u > susie_ggo_human_layout.txt 
+``` cd utils
+
+cd examples
+
+cat susie_ggo_grch38.minimap.txt  | ../bin/layout -u > susie_ggo_human_layout.txt
+
  Rscript --vanilla ../plot/plotLayout.R -f susie_ggo_human_layout.txt -p gor-vs-human.pdf ```
