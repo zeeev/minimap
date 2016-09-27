@@ -3,7 +3,7 @@
 #     zev.kronenberg@gmail.com       #
 ######################################
 
-CXX=g++ -Wreorder
+CXX=g++
 GIT_VERSION := $(shell git describe --abbrev=4 --dirty --always)
 
 
@@ -11,10 +11,13 @@ GIT_VERSION := $(shell git describe --abbrev=4 --dirty --always)
 
 all: bin/chain bin/layout
 
-bin/chain:
+bin/chain: createBin
 	cd chain && $(CXX) *cpp -o ../bin/qChain
-bin/layout:
+bin/layout: createBin
 	cd layout && $(CXX) *cpp -o ../bin/layout
+
+createBin:
+	-mkdir bin
 
 clean:
 	 -cd chain && rm *.o && cd ../layout && rm *.o && cd ../bin && rm -rf *
