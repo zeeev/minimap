@@ -9,13 +9,13 @@
 #include "split.hpp"
 
 struct opts{
-    bool include;
+    bool include ;
+    bool ordered ;
     std::vector<std::string> tOrder;
     std::map<std::string, bool> toInclude;
-
 }globalOpts;
 
-static const char *optString = "i:s:hu";
+static const char *optString = "i:h";
 
 struct matchInfo{
     long int posStrand;
@@ -114,24 +114,17 @@ bool loadData(qtCount & qtMatch,
 }
 
 void printHelp(void){
-    std::cerr << "Layout provides a simple algorithm to layout minimap" << std::endl << std::endl;
-    std::cerr << "alignments for plotting. It works on both chained" << std::endl << std::endl;
+    std::cerr << "Layout provides a simple algorithm to layout minimap" << std::endl;
+    std::cerr << "alignments for plotting. It works on both chained" << std::endl ;
     std::cerr << "and unchained alignments." << std::endl << std::endl;
     std::cerr << "Usage:" << std::endl;
     std::cerr << " layout -h" << std::endl;
-    std::cerr << " cat minimap.txt | layout -s [target_seqid_order] " << std::endl;
-    std::cerr << " cat minimap.txt | layout -u " << std::endl << std::endl;
+    std::cerr << " cat minimap.txt | layout -i [target_seqid_order] " << std::endl;
+    std::cerr << " cat minimap.txt | layout " << std::endl << std::endl;
     std::cerr << "Options:" << std::endl;
     std::cerr << " -h  Show this message." << std::endl;
-    std::cerr << " -s  A comma separated list of target seqids."       << std::endl;
-    std::cerr << "     This option orders targets based on the list."  << std::endl;
-    std::cerr << "     All targets are still in the output."           << std::endl;
-    std::cerr << " -u  Order targets by human seqids chr1,chr2,chr3..."<< std::endl;
-    std::cerr << " -i  A comma seperated list of targets to keep.     "<< std::endl << std::endl;
-    std::cerr << "Details:" << std::endl;
-    std::cerr << "  -u and -s can be mixed, but -s is parsed before -u" << std::endl;
-
-
+    std::cerr << " -i  A comma seperated list of targets.     " << std::endl;
+    std::cerr << "     This also dictates target order.       " << std::endl;
 }
 
 int parseOpts(int argc, char** argv)
@@ -142,14 +135,23 @@ int parseOpts(int argc, char** argv)
         switch(opt){
         case 'i':
             {
-                std::vector<std::string> include = split((std::string)optarg, ",");
+
+                globalOpts.include = true;
+                globalOpts.ordered = true;
+
+                std::vector<std::string> include
+                    = split((std::string)optarg, ",");
+
                 for(std::vector<std::string>::iterator it = include.begin();
                     it != include.end(); it++){
                     globalOpts.toInclude[*it] = true;
+                    globalOpts.tOrder.push_back(*it);
                 }
-                globalOpts.include = true;
+
                 if(globalOpts.toInclude.empty()){
-                    std::cerr << "FATAL: check -i, it should be a comma sep list." << std::endl;
+                    std::cerr
+                        << "FATAL: check -i, it should be a comma sep list."
+                        << std::endl;
                     return 0;
                 }
                 break;
@@ -158,42 +160,10 @@ int parseOpts(int argc, char** argv)
             {
                 return 0;
             }
-        case 's':
-            {
-                globalOpts.tOrder = split((std::string)optarg, ",");
-                break;
-            }
-        case 'u':
-            {
-                globalOpts.tOrder.push_back("chr1");
-                globalOpts.tOrder.push_back("chr2");
-                globalOpts.tOrder.push_back("chr3");
-                globalOpts.tOrder.push_back("chr4");
-                globalOpts.tOrder.push_back("chr5");
-                globalOpts.tOrder.push_back("chr6");
-                globalOpts.tOrder.push_back("chr7");
-                globalOpts.tOrder.push_back("chr8");
-                globalOpts.tOrder.push_back("chr9");
-                globalOpts.tOrder.push_back("chr10");
-                globalOpts.tOrder.push_back("chr11");
-                globalOpts.tOrder.push_back("chr12");
-                globalOpts.tOrder.push_back("chr13");
-                globalOpts.tOrder.push_back("chr14");
-                globalOpts.tOrder.push_back("chr15");
-                globalOpts.tOrder.push_back("chr16");
-                globalOpts.tOrder.push_back("chr17");
-                globalOpts.tOrder.push_back("chr18");
-                globalOpts.tOrder.push_back("chr19");
-                globalOpts.tOrder.push_back("chr20");
-                globalOpts.tOrder.push_back("chr21");
-                globalOpts.tOrder.push_back("chr22");
-                globalOpts.tOrder.push_back("chrX");
-                globalOpts.tOrder.push_back("chrY");
-                break;
-            }
         default:
             {
-                std::cerr << "FATAL: unable to parse command line correctly." << std::endl;
+                std::cerr << "FATAL: unable to parse command line correctly."
+                          << std::endl;
                 return 0;
             }
         }
@@ -204,7 +174,8 @@ int parseOpts(int argc, char** argv)
 
 int main(int argc, char ** argv)
 {
-    globalOpts.include = false;
+    globalOpts.include  = false;
+    globalOpts.ordered  = false;
 
     int parse = parseOpts(argc, argv);
     if(parse != 1){
@@ -220,6 +191,13 @@ int main(int argc, char ** argv)
     std::map<std::string, long int>         tLens;
 
     loadData(qtMatch, records_tSorted, tLens);
+
+    if(globalOpts.ordered == false){
+        for(std::map<std::string, long int>::iterator it = tLens.begin();
+            it != tLens.end() ; it++){
+            globalOpts.tOrder.push_back(it->first);
+        }
+    }
 
     std::cerr << "INFO: Loaded "  << records_tSorted.size()
               << " alignments " << std::endl;
@@ -248,7 +226,6 @@ int main(int argc, char ** argv)
 
     std::map<std::string, long int > qOffset;
     std::map<std::string, long int > tOffset;
-
     std::map<std::string, long int > highQmatch;
 
     long int qSum = 0;
@@ -261,6 +238,7 @@ int main(int argc, char ** argv)
             if((*it) != (*i)->tName){
                 continue;
             }
+
 
             if(bestTarget[(*i)->qName] == (*i)->tName){
                 if(highQmatch.find((*i)->qName) == highQmatch.end()){
@@ -283,8 +261,7 @@ int main(int argc, char ** argv)
     for(std::vector<std::string>::iterator it = globalOpts.tOrder.begin();
         it != globalOpts.tOrder.end(); it++){
         if(tLens.find(*it) == tLens.end()){
-            std::cerr << "FATAL: target length not found: " << *it << std::endl;
-            return 1;
+            std::cerr << "FATAL: " << *it << " not found " << std::endl;
         }
         tOffset[*it] = tSum       ;
         tSum         += tLens[*it];
@@ -315,7 +292,7 @@ int main(int argc, char ** argv)
 
         (*i)->qStart = (*i)->qStart + qOffset[(*i)->qName];
         (*i)->qEnd   = (*i)->qEnd   + qOffset[(*i)->qName];
-        if(!globalOpts.include){
+        if(globalOpts.tOrder.size() > 1){
             (*i)->tStart = (*i)->tStart + tOffset[(*i)->tName];
             (*i)->tEnd   = (*i)->tEnd   + tOffset[(*i)->tName];
         }
