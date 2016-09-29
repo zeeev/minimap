@@ -296,6 +296,12 @@ int main(int argc, char ** argv)
             (*i)->tStart = (*i)->tStart + tOffset[(*i)->tName];
             (*i)->tEnd   = (*i)->tEnd   + tOffset[(*i)->tName];
         }
+        if((*i)->strand == '-'){
+            long int tmp = (*i)->qStart;
+            (*i)->qStart = (*i)->qEnd;
+            (*i)->qEnd   = tmp;
+        }
+
         std::cout << **i << std::endl;
     }
 
