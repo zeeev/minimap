@@ -30,11 +30,6 @@ void processSeqid(std::vector<std::string> & lines,
         long int qEnd   = atol(lineDat[3].c_str());
         long int matchB = atol(lineDat[9].c_str());
 
-        if(lineDat[4] == "-"){
-            long int tmp = qStart ;
-            qStart = qLen - qEnd  ;
-            qEnd   = qLen - tmp   ;
-        }
         qChain.addAlignment(qStart, qEnd, matchB);
     }
 
