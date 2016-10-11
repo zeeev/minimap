@@ -149,6 +149,7 @@ int main(int argc, char ** argv)
             intervals.insert((*it), (*it)->getTMin(),
                              (*it)->getTMax());
         }
+        std::cerr << **it << std::endl;
     }
     return 0;
 }

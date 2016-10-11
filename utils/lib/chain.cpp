@@ -51,6 +51,8 @@ bool chain::addAlignment(std::vector<alignment *> & als){
             alignments.push_back(*it);
             qName = (*it)->qName;
             tName = (*it)->tName;
+            tLen  = (*it)->tLen;
+            qLen  = (*it)->qLen;
         }
         else{
             if((*it)->qName != qName){
@@ -105,6 +107,10 @@ void chain::printBed(void){
               << this->matchingBases
               << "\t"
               << this->alignments.size()
+              << "\t"
+              << this->tLen
+              << "\t"
+              << this->qLen
               << std::endl;
 }
 

@@ -9,6 +9,12 @@ option_list = list(
             help="layout file",
             metavar="character"
             ),
+            make_option(c("-s", "--scaffold"),
+            action="store_true",
+            default=FALSE,
+            help="color alignments by scaffold",
+            metavar="bool"
+            ),
             make_option(c("-p", "--pdf"),
             type="character",
             default=NULL,
@@ -81,13 +87,24 @@ tdat<-dat[dat$V17 > opt$dots,  ]
 
 vdat<-aggregate(dat$V5, by=list(dat$V4), max)
 
-thePlot<-ggplot()+geom_segment(data=dat,mapping=aes(y=V2/1e6, yend=V3/1e6, x=V5/1e6, xend=V6/1e6, colour=V7))
+if(opt$scaffold){
+        thePlot<-ggplot()+geom_segment(data=dat,mapping=aes(y=V2/1e6, yend=V3/1e6, x=V5/1e6, xend=V6/1e6, colour=V1))
+}else{
+        thePlot<-ggplot()+geom_segment(data=dat,mapping=aes(y=V2/1e6, yend=V3/1e6, x=V5/1e6, xend=V6/1e6, colour=V7))
+}
+
 thePlot<-thePlot+theme_classic()
 thePlot<-thePlot+theme(legend.position="none")
 
 thePlot<-thePlot+labs(x=opt$xlab, y=opt$ylab, title=opt$title)
-thePlot<-thePlot+geom_point(data=tdat, aes(x=V5/1e6, y=V2/1e6, colour=V7), size=0.5)
-thePlot<-thePlot+geom_point(data=tdat, aes(x=V6/1e6, y=V3/1e6, colour=V7), size=0.5)
+
+if(opt$scaffold){
+        thePlot<-thePlot+geom_point(data=tdat, aes(x=V5/1e6, y=V2/1e6, colour=V1), size=0.5)
+        thePlot<-thePlot+geom_point(data=tdat, aes(x=V6/1e6, y=V3/1e6, colour=V1), size=0.5)
+}else{
+        thePlot<-thePlot+geom_point(data=tdat, aes(x=V5/1e6, y=V2/1e6, colour=V7), size=0.5)
+        thePlot<-thePlot+geom_point(data=tdat, aes(x=V6/1e6, y=V3/1e6, colour=V7), size=0.5)
+}
 
 thePlot<-thePlot+geom_vline(xintercept=vdat$x/1e6, linetype="longdash", alpha=0.2)
 
