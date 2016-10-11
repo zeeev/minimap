@@ -5,19 +5,31 @@
 
 CXX=g++
 GIT_VERSION := $(shell git describe --abbrev=4 --dirty --always)
+CFLAGS       = -Wall -DVERSION=\"$(GIT_VERSION)\" -std=c++0x -g
+INCLUDE      = -I lib/
+CPP_FILES    = $(wildcard lib/*cpp)
+OBJ_FILES    = $(addprefix lib/,$(notdir $(CPP_FILES:.cpp=.o)))
+BIN_FILES    = $(wildcard src/*cpp)
+BIN_NAMES    = $(notdir $(BIN_FILES:.cpp=))
 
+.PHONY: bins
 
-.PHONY: all clean
+bins: createBin bin/layout bin/qChain bin/synblocks
 
-all: bin/chain bin/layout
+bin/synblocks: $(OBJ_FILES)
+	$(CXX) $(CFLAGS) $(INCLUDE) $(OBJ_FILES) -o bin/synblocks src/synblocks.cpp
 
-bin/chain: createBin
-	cd chain && $(CXX) *cpp -o ../bin/qChain
-bin/layout: createBin
-	cd layout && $(CXX) *cpp -o ../bin/layout
+bin/layout: $(OBJ_FILES)
+	$(CXX) $(CFLAGS) $(INCLUDE) $(OBJ_FILES) -o bin/layout src/layout.cpp
+
+bin/qChain: $(OBJ_FILES)
+	$(CXX) $(CFLAGS) $(INCLUDE) $(OBJ_FILES) -o bin/qChain src/chaining.cpp
+
+src/%.o: src/%.cpp $(BAMTOOLS_LIB)
+	$(CXX) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 
 createBin:
 	-mkdir bin
 
 clean:
-	 -cd chain && rm *.o && cd ../layout && rm *.o && cd ../bin && rm -rf *
+	-cd lib && rm *.o && rm -rf ../bin
