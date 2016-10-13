@@ -26,7 +26,6 @@ bool processSeqid(std::vector<std::string> & lines,
 
     long int lastQend  =  -1 ;
     long int lastTend  =  -1 ;
-    char lastStrand    = '-' ;
 
     std::vector<alignment *> als;
 
@@ -57,14 +56,12 @@ bool processSeqid(std::vector<std::string> & lines,
                 als.push_back(al);
                 lastTend = -1;
                 lastQend = -1;
-                lastStrand = al->strand;
         }
         else{
             //            std::cerr << qGap << "\t" << tGap << std::endl;
             als.push_back(al);
             lastTend = al->tEnd;
             lastQend = al->qEnd;
-            lastStrand = al->strand;
         }
     }
     if(als.size() > 0){
@@ -124,32 +121,36 @@ int main(int argc, char ** argv)
 
     sort(myChains.begin(), myChains.end(), revSortByScore);
 
-    IntervalTree< chain * >  intervals;
+    IntervalTree< chain * > intervals;
 
-    for(chains::iterator it = myChains.begin();
-        it != myChains.end(); it++){
+    chains::iterator it = myChains.begin();
+
+    for( ; it != myChains.end(); it++){
 
         (*it)->chainToBed();
 
-        std::vector< chain *> results = intervals.fetch(
-                                                        (*it)->getTMin(),
-                                                        (*it)->getTMax());
-        bool hit = false;
+        std::vector< chain *> results = intervals.fetch((*it)->getTMin(), (*it)->getTMax());
+
+        bool nohit = true;
 
         for(chains::iterator iz = results.begin();
             iz != results.end(); iz++){
+
             if((*iz)->getTName() == (*it)->getTName()){
-                hit = true;
+
+                nohit = false;
             }
         }
-        if(hit){
-        }
-        else{
+        if(nohit){
+            std::cerr << **it << std::endl;
             (*it)->printBed();
-            intervals.insert((*it), (*it)->getTMin(),
-                             (*it)->getTMax());
+            intervals.insert((*it), (*it)->getTMin(),  (*it)->getTMax());
         }
-        std::cerr << **it << std::endl;
     }
+    it = myChains.begin();
+    for( ; it != myChains.end(); it++){
+        (*it)->cleanUp();
+    }
+
     return 0;
 }

@@ -1,5 +1,36 @@
 #include "chain.hpp"
 
+void chain::_printBed(void){
+
+    char strand = this->alignments.front()->strand;
+
+
+
+    std::cout << this->tName
+              << "\t"
+              << this->tMin
+              << "\t"
+              << this->tMax
+              << "\t"
+              << this->qName
+              << "\t"
+              << this->qMin
+              << "\t"
+              << this->qMax
+              << "\t"
+              << strand
+              << "\t"
+              << this->matchingBases
+              << "\t"
+              << this->alignments.size()
+              << "\t"
+              << this->tLen
+              << "\t"
+              << this->qLen
+              << std::endl;
+}
+
+
 long int chain::getTMin(void){
     return this->tMin;
 }
@@ -33,14 +64,18 @@ chain::chain(void){
     tMax  = 0;
     qMin  = 0;
     qMax  = 0;
+
+    twoStrands = false;
 }
 
-chain::~chain(void){
-
+void chain::cleanUp(void){
     for(std::vector<alignment *>::iterator it
             = alignments.begin(); it != alignments.end(); it++){
         delete *it;
     }
+}
+
+chain::~chain(void){
 }
 
 bool chain::addAlignment(std::vector<alignment *> & als){
@@ -66,16 +101,15 @@ bool chain::addAlignment(std::vector<alignment *> & als){
     return true;
 }
 
-
 bool chain::addAlignment(alignment * al){
 
     if(qName.empty()){
-        alignments.push_back(al);
         qName = al->qName;
         tName = al->tName;
     }
     else{
         if(al->qName != qName){
+            std::cerr << "WANRING: name not the same" << std::endl;
             return false;
         }
     }
@@ -84,6 +118,9 @@ bool chain::addAlignment(alignment * al){
     this->qLen = al->qLen;
 
     this->matchingBases += al->match;
+
+    alignments.push_back(al);
+
     return true;
 }
 
@@ -92,26 +129,40 @@ long int chain::getMatchingBases(void){
 }
 
 void chain::printBed(void){
-    std::cout << this->tName
-              << "\t"
-              << this->tMin
-              << "\t"
-              << this->tMax
-              << "\t"
-              << this->qName
-              << "\t"
-              << this->qMin
-              << "\t"
-              << this->qMax
-              << "\t"
-              << this->matchingBases
-              << "\t"
-              << this->alignments.size()
-              << "\t"
-              << this->tLen
-              << "\t"
-              << this->qLen
-              << std::endl;
+
+    bool flipped = this->alignments.front()->flipped;
+
+    if(flipped == true){
+        flipped = false;
+    }
+    else{
+        flipped = true;
+    }
+
+    std::vector<chain *> chains;
+
+    for(std::vector<alignment *>::iterator it = this->alignments.begin();
+        it != this->alignments.end(); it++){
+
+        if((*it)->flipped != flipped){
+             chain * nc = new chain;
+            nc->addAlignment(*it);
+            chains.push_back(nc);
+            flipped = (*it)->flipped;
+        }
+        else{
+            chains.back()->addAlignment(*it);
+        }
+    }
+
+    for(std::vector<chain *>::iterator it = chains.begin();
+        it != chains.end(); it++){
+
+        (*it)->chainToBed();
+        (*it)->_printBed();
+
+        delete *it;
+    }
 }
 
 bool chain::chainToBed(void){
@@ -136,7 +187,6 @@ bool chain::chainToBed(void){
         if((*it)->qEnd > qMax){
             qMax = (*it)->qEnd;
         }
-
     }
     return true;
 }

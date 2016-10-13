@@ -3,6 +3,7 @@
 
 #include "alignment.hpp"
 #include <vector>
+#include <map>
 
 class chain{
     typedef long int LI;
@@ -20,6 +21,10 @@ private:
     std::string tName;
     std::string qName;
 
+    bool twoStrands;
+
+    void _printBed(void);
+
 public:
 
     std::vector<alignment *> alignments;
@@ -35,7 +40,7 @@ public:
     std::string getQName(void);
 
     LI getMatchingBases( void     );
-    int getNAlignments(void    );
+    int getNAlignments( void    );
 
     LI getQMax(void);
     LI getQMin(void);
@@ -43,6 +48,7 @@ public:
     LI getTMin(void);
 
     void printBed(void);
+    void cleanUp(void);
 
     inline friend std::ostream & operator<< (std::ostream & os, chain & ch);
 
@@ -54,8 +60,14 @@ public:
 std::ostream & operator<< (std::ostream & os, chain & ch)
 {
     os << "chain score: " << ch.matchingBases  << std::endl;
+    os << "n chain:  " << ch.alignments.size() << std::endl;
     for(std::vector<alignment *>::iterator it = ch.alignments.begin();
         it != ch.alignments.end(); it++){
+
+        if((*it)->flipped){
+            (*it)->revCompT();
+        }
+
         os << (**it) << std::endl;
     }
 

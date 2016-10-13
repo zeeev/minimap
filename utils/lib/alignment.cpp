@@ -25,26 +25,28 @@ bool alignment::parseMMLine(std::string & line){
 
 }
 
-
-
 alignment::alignment(void){
 }
 
 alignment::~alignment(void){
 }
 
+
 void alignment::revCompQ(void){
 
-   LI tmp = qStart       ;
-   qStart = qLen - qEnd  ;
-   qEnd   = qLen - tmp   ;
 
-   if(strand == 45){
-       strand = 43;
-   }
-   else{
-       strand = 45;
-   }
+    LI tmp = qStart       ;
+    qStart = qLen - qEnd  ;
+    qEnd   = qLen - tmp   ;
+
+
+    if(strand == 45){
+        strand = 43;
+    }
+    else{
+        strand = 45;
+    }
+
    if(flipped == true){
        flipped = false;
    }
@@ -59,6 +61,14 @@ void alignment::revCompT(void){
     LI tmp = tStart       ;
     tStart = tLen - tEnd  ;
     tEnd   = tLen - tmp   ;
+
+    if(strand == 45){
+        strand = 43;
+    }
+    else{
+        strand = 45;
+    }
+
 
     if(flipped == true){
         flipped = false;
