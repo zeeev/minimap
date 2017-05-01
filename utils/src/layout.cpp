@@ -11,11 +11,13 @@
 struct opts{
     bool include ;
     bool ordered ;
+    bool qi ;
     std::vector<std::string> tOrder;
     std::map<std::string, bool> toInclude;
+
 }globalOpts;
 
-static const char *optString = "i:h";
+static const char *optString = "i:hq";
 
 struct matchInfo{
     long int posStrand;
@@ -124,6 +126,7 @@ void printHelp(void){
     std::cerr << "Options:" << std::endl;
     std::cerr << " -h  Show this message." << std::endl;
     std::cerr << " -i  A comma seperated list of targets.     " << std::endl;
+    std::cerr << " -q  flag no query offset.                  " << std::endl;
     std::cerr << "     This also dictates target order.       " << std::endl;
 }
 
@@ -156,7 +159,13 @@ int parseOpts(int argc, char** argv)
                 }
                 break;
             }
+        case 'q':
+            {
+                globalOpts.qi = false;
+                break;
+            }
         case 'h':
+
             {
                 return 0;
             }
@@ -176,6 +185,7 @@ int main(int argc, char ** argv)
 {
     globalOpts.include  = false;
     globalOpts.ordered  = false;
+    globalOpts.qi       = true ;
 
     int parse = parseOpts(argc, argv);
     if(parse != 1){
@@ -290,8 +300,14 @@ int main(int argc, char ** argv)
             }
         }
 
-        (*i)->qStart = (*i)->qStart + qOffset[(*i)->qName];
-        (*i)->qEnd   = (*i)->qEnd   + qOffset[(*i)->qName];
+        if(globalOpts.qi){
+            (*i)->qStart = (*i)->qStart + qOffset[(*i)->qName];
+            (*i)->qEnd   = (*i)->qEnd   + qOffset[(*i)->qName];
+        }
+        else{
+            (*i)->qStart = (*i)->qStart ;
+            (*i)->qEnd   = (*i)->qEnd   ;
+        }
         if(globalOpts.tOrder.size() > 1){
             (*i)->tStart = (*i)->tStart + tOffset[(*i)->tName];
             (*i)->tEnd   = (*i)->tEnd   + tOffset[(*i)->tName];
